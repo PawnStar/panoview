@@ -1,0 +1,97 @@
+<!--SLIGHTLY MODIFIED FROM https://developers.google.com/maps/documentation/javascript/examples/streetview-custom-simple-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Panorama Viewer</title>
+    <meta charset="utf-8">
+    <style>
+      #map-canvas, #dropZone{
+        position:absolute;
+        top:0;
+        left:0;
+        right:0;
+        bottom:0;
+      }
+
+      #dropZone{
+        opacity:0;
+        width:100%;
+        display:block;
+      }
+    </style>
+    <script>
+      var loadedImage = null;
+      var imageWidth = 0;
+      var imageHeight = 0;
+
+    	function initialize() {
+        document.getElementById('dropZone').addEventListener('change', function(ev){
+          console.log('started reading')
+          var fileReader = new FileReader();
+          fileReader.onload = function(result){
+            var img = new Image;
+            img.onload = function(){
+              //We now know size,
+              loadedImage = result.target.result;
+              imageWidth = img.width;
+              imageHeight = img.height;
+              switchImage();
+            }
+            img.src = result.target.result;
+          }
+          fileReader.readAsDataURL(ev.target.files[0]);
+        }, false);
+    	}
+
+    	// Return a pano image given the panoID.
+    	function getCustomPanoramaTileUrl(pano, zoom, tileX, tileY) {
+    	  // Note: robust custom panorama methods would require tiled pano data.
+    	  // Here we're just using a single tile, set to the tile size and equal
+    	  // to the pano "world" size.
+        return loadedImage;
+    	}
+
+    	// Construct the appropriate StreetViewPanoramaData given
+    	// the passed pano IDs.
+    	function displayCurrentPanorama(pano, zoom, tileX, tileY) {
+  			return {
+  				position: '',
+  				linksControl: false,
+  				panControl: false,
+  				zoomControl: false,
+  				scaleControl: true,
+  				enableCloseButton: false,
+  				tiles: {
+  					tileSize: new google.maps.Size(imageWidth, imageHeight),
+  					worldSize: new google.maps.Size(imageWidth, imageHeight),
+  					centerHeading: 0,
+  					getTileUrl: function(){return loadedImage;}
+  				},
+  				links: []
+  			};
+    	}
+
+    	//image variable is the pano-id set up in the previous things.
+    	function switchImage(){
+    		// Set up Street View and initially set it visible. Register the
+    		// custom panorama provider function. Set the StreetView to display
+    		// the custom panorama 'reception' which we check for below.
+    		var panoOptions = {
+    			pano: 'unknown',
+    			visible: true,
+    			panoProvider: displayCurrentPanorama
+    		};
+
+    		var panorama = new google.maps.StreetViewPanorama(
+    	    document.getElementById('map-canvas'), panoOptions
+        );
+    	}
+    </script>
+  </head>
+  <body>
+  	<div id="map-canvas"></div>
+    <input id="dropZone" type="file" name="imageUpload">
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAsynWXmLbm8QmqppnkwjdBRahtQYqarlQ&callback=initialize" type="text/javascript"></script>
+  </body>
+</html>
